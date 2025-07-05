@@ -4,26 +4,39 @@ import { useNavigate } from "react-router-dom";
 
 export default function useCredentials() {
     const navigate = useNavigate();
-
-    const stored = localStorage.getItem("credentials");
-    const parsed = stored ? JSON.parse(stored) : null;
-
-    const [credentials] = useState(parsed);
-    const [s3] = useState(() =>
-        parsed ? new S3Client({
-            region: parsed.region,
-            credentials: {
-                accessKeyId: parsed.access_key,
-                secretAccessKey: parsed.secret_key
-            }
-        }) : null
-    );
+    const [s3, setS3] = useState(null);
+    const [credentials, setCredentials] = useState(null);
 
     useEffect(() => {
-        if (!parsed) {
+        const stored = localStorage.getItem("credentials") || null;
+        if (!stored) {
+            navigate("/config");
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(stored);
+            const { region, access_key, secret_key } = parsed;
+
+            if (!region || !access_key || !secret_key) {
+                navigate("/config");
+                return;
+            }
+
+            setCredentials(parsed);
+            const client = new S3Client({
+                region,
+                credentials: {
+                    accessKeyId: access_key,
+                    secretAccessKey: secret_key
+                }
+            });
+            setS3(client);
+        } catch (err) {
+            console.error("Invalid credentials in localStorage", err);
             navigate("/config");
         }
-    }, [navigate, parsed]);
+    }, [navigate]);
 
     return { s3, credentials };
 }
