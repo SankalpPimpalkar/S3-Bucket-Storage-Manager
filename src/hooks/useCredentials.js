@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function useCredentials() {
     const navigate = useNavigate();
-    const [s3, setS3] = useState(null);
+    const [s3, setS3] = useState(new S3Client());
     const [credentials, setCredentials] = useState({
         region: "",
         access_key: "",
