@@ -1,0 +1,15 @@
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+export default async function getFilePreview(s3, key, download = false) {
+    const command = new GetObjectCommand({
+        Bucket: "enderchestbucket",
+        Key: key,
+        ...(download && {
+            ResponseContentDisposition: 'attachment; filename="' + key + '"',
+        }),
+    });
+
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return url;
+}
