@@ -5,7 +5,11 @@ import { useNavigate } from "react-router-dom";
 export default function useCredentials() {
     const navigate = useNavigate();
     const [s3, setS3] = useState(null);
-    const [credentials, setCredentials] = useState(null);
+    const [credentials, setCredentials] = useState({
+        region: "",
+        access_key: "",
+        secret_key: ""
+    });
 
     useEffect(() => {
         const stored = localStorage.getItem("credentials") || null;
