@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useCredentials from '../hooks/useCredentials'
 
@@ -10,8 +10,8 @@ export default function ConfigurationForm() {
         access_key: '',
         region: ''
     })
+    const { credentials } = useCredentials()
     const navigate = useNavigate()
-    const { s3 } = useCredentials()
 
     function handleSubmit(event) {
         event.preventDefault()
@@ -29,6 +29,12 @@ export default function ConfigurationForm() {
         localStorage.setItem("credentials", JSON.stringify(formData))
         navigate('/')
     }
+
+    useEffect(() => {
+        if (credentials) {
+            navigate('/')
+        }
+    }, [navigate, credentials])
 
     return (
         <div className='w-full min-h-dvh bg-[#101010] text-gray-300 flex items-center justify-center'>

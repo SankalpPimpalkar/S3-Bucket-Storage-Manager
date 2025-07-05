@@ -1,5 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const credentialsContext = createContext({
     s3: null,
@@ -9,11 +10,13 @@ export const credentialsContext = createContext({
 export default function CredentialsProvider({ children }) {
     const [s3, setS3] = useState(null);
     const [credentials, setCredentials] = useState(null);
+    const navigate = useNavigate()
 
     useEffect(() => {
         const stored = localStorage.getItem("credentials");
         if (!stored) {
             console.error("No credentials found in localStorage");
+            navigate('/config')
             return;
         }
 
@@ -23,6 +26,7 @@ export default function CredentialsProvider({ children }) {
 
             if (!region || !access_key || !secret_key || !name) {
                 console.error("Incomplete credentials found in localStorage");
+                navigate('/config')
                 return;
             }
 
@@ -39,8 +43,9 @@ export default function CredentialsProvider({ children }) {
             setS3(client);
         } catch (err) {
             console.error("Invalid credentials in localStorage", err);
+            navigate('/config')
         }
-    }, []); // ✅ only run on mount
+    }, []);
 
     const values = { s3, credentials };
 
