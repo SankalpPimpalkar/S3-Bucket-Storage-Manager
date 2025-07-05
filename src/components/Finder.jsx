@@ -5,20 +5,20 @@ import useCredentials from '../hooks/useCredentials'
 
 export default function Finder({ contents = [], setCurrentDirectory }) {
 
-    const { s3 } = useCredentials()
+    const { s3, credentials } = useCredentials()
 
     async function handleFilePreview(key) {
-        const previewUrl = await getFilePreview(s3, key)
+        const previewUrl = await getFilePreview(s3, key, credentials.name)
         window.open(previewUrl, '_blank')
     }
 
     async function handleDeleteFileOrFolder(key) {
-        await deleteFileOrFolder(s3, key)
+        await deleteFileOrFolder(s3, key, credentials.name)
         setCurrentDirectory('')
     }
 
     async function handleFileDownload(key) {
-        const previewUrl = await getFilePreview(s3, key, true)
+        const previewUrl = await getFilePreview(s3, key, true, credentials.name)
         const a = document.createElement('a');
         a.href = previewUrl;
         a.download = '';

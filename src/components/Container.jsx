@@ -10,7 +10,7 @@ export default function Container() {
     const [files, setFiles] = useState([])
     const [currentDirectory, setCurrentDirectory] = useState("/")
     const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
-    const { s3 } = useCredentials()
+    const { s3, credentials } = useCredentials()
 
     function handleBack() {
         const parts = currentDirectory.split("/").filter(Boolean);
@@ -32,7 +32,7 @@ export default function Container() {
 
     useEffect(() => {
         (async () => {
-            const contents = await listFiles(s3, currentDirectory)
+            const contents = await listFiles(s3, currentDirectory, credentials.name)
             setFiles(contents)
         })()
     }, [currentDirectory, s3])

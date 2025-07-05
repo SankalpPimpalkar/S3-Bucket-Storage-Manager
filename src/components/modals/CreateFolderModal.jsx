@@ -5,13 +5,13 @@ import useCredentials from '../../hooks/useCredentials'
 export default function CreateFolderModal({ isOpen, handleClose, currentDirectory = "", setCurrentDirectory }) {
 
     const [folderName, setFolderName] = useState('')
-    const { s3 } = useCredentials()
+    const { s3, credentials } = useCredentials()
 
     async function handleCreateFolder(event) {
         event.preventDefault()
         let folderPath = currentDirectory.slice(1)
 
-        await addFolder(s3, folderPath + folderName)
+        await addFolder(s3, folderPath + folderName, credentials.name)
         setCurrentDirectory(folderPath + folderName + '/')
         handleClose()
     }

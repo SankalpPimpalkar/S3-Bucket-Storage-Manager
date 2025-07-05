@@ -1,6 +1,6 @@
 import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 
-export default async function listFiles(s3, prefix = "") {
+export default async function listFiles(s3, prefix = "", bucketName = "") {
 
     let normalizedPrefix = prefix.startsWith("/") ? prefix.slice(1) : prefix;
     if (normalizedPrefix && !normalizedPrefix.endsWith("/")) {
@@ -8,7 +8,7 @@ export default async function listFiles(s3, prefix = "") {
     }
 
     const command = new ListObjectsV2Command({
-        Bucket: "enderchestbucket",
+        Bucket: bucketName,
         Prefix: normalizedPrefix,
         Delimiter: "/",
     });
