@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import useCredentials from "../hooks/useCredentials"
 
-export default function Header() {
-
-    const { credentials } = useCredentials()
+export default function Header({ credentials }) {
     const navigate = useNavigate()
 
     function handleDisconnect() {
@@ -27,7 +25,7 @@ export default function Header() {
                     <div className='bg-[#101010] border border-[#202020] px-4 py-2 flex items-center gap-2 rounded-md select-none'>
                         <div className='w-2 h-2 aspect-square rounded-full bg-green-400 animate-pulse' />
                         <p className='text-xs text-gray-300'>
-                            {credentials.region}
+                            {credentials?.region}
                         </p>
                     </div>
                     <button onClick={handleDisconnect} className='bg-red-500 active:bg-red-600 text-white font-medium text-xs px-4 py-2 rounded-md cursor-pointer'>

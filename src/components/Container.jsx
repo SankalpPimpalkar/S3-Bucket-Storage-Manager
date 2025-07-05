@@ -35,8 +35,7 @@ export default function Container() {
             const contents = await listFiles(s3, currentDirectory)
             setFiles(contents)
         })()
-    }, [currentDirectory])
-
+    }, [currentDirectory, s3])
 
     return (
         <div className='w-full px-4 py-4 pb-20'>

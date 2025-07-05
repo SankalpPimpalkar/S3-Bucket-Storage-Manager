@@ -2,10 +2,6 @@ import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 export default async function listFiles(s3, prefix = "") {
 
-    if (!s3) {
-        throw new Error("S3 client is not initialized");
-    }
-
     let normalizedPrefix = prefix.startsWith("/") ? prefix.slice(1) : prefix;
     if (normalizedPrefix && !normalizedPrefix.endsWith("/")) {
         normalizedPrefix += "/";
