@@ -2,6 +2,11 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export default async function getFilePreview(s3, key, download = false) {
+
+    if (!s3) {
+        throw new Error("S3 client is not initialized");
+    }
+
     const command = new GetObjectCommand({
         Bucket: "enderchestbucket",
         Key: key,
