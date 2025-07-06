@@ -1,4 +1,4 @@
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, DeleteObjectsCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 export default async function deleteFileOrFolder(s3, key = "", bucketName = "") {
 
@@ -6,10 +6,17 @@ export default async function deleteFileOrFolder(s3, key = "", bucketName = "") 
         throw new Error("S3 client is not initialized");
     }
 
-    const command = new DeleteObjectCommand({
+    const listedObjects = await s3.send(new ListObjectsV2Command({
         Bucket: bucketName,
-        Key: key
-    })
+        Prefix: key
+    }));
 
+    const command = new  DeleteObjectsCommand({
+        Bucket: bucketName,
+        Delete: {
+            Objects: listedObjects.Contents.map(obj => ({Key: obj.Key})),
+            Quiet: true
+        }
+    })
     await s3.send(command)
 }

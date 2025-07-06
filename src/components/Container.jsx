@@ -8,9 +8,11 @@ import useCredentials from '../hooks/useCredentials'
 export default function Container() {
 
     const [files, setFiles] = useState([])
+    const [folderName, setFolderName] = useState('')
     const [currentDirectory, setCurrentDirectory] = useState("/")
     const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false)
     const { s3, credentials } = useCredentials()
+    const [uploading, setUploading] = useState(false)
 
     function handleBack() {
         const parts = currentDirectory.split("/").filter(Boolean);
@@ -19,7 +21,6 @@ export default function Container() {
     }
 
     useEffect(() => {
-
         const onPopState = () => {
             handleBack();
         };
@@ -31,11 +32,14 @@ export default function Container() {
     }, [currentDirectory])
 
     useEffect(() => {
+
+        if (!credentials) return
+
         (async () => {
             const contents = await listFiles(s3, currentDirectory, credentials.name)
             setFiles(contents)
         })()
-    }, [currentDirectory, s3])
+    }, [currentDirectory, s3, credentials, uploading])
 
     return (
         <div className='w-full px-4 py-4 pb-20'>
@@ -60,7 +64,11 @@ export default function Container() {
                 </div>
 
                 <div className='p-4 bg-[#101010]'>
-                    <FileDropper />
+                    <FileDropper
+                        currentDirectory={currentDirectory}
+                        uploading={uploading}
+                        setUploading={setUploading}
+                    />
                 </div>
 
                 {/* <div></div> */}
@@ -76,8 +84,13 @@ export default function Container() {
 
             {/* Modals */}
             <CreateFolderModal
+                folderName={folderName}
+                setFolderName={setFolderName}
                 isOpen={isCreateFolderModalOpen}
-                handleClose={() => setIsCreateFolderModalOpen(false)}
+                handleClose={() => {
+                    setIsCreateFolderModalOpen(false)
+                    setFolderName('')
+                }}
                 currentDirectory={currentDirectory}
                 setCurrentDirectory={setCurrentDirectory}
             />

@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react'
 import addFolder from '../../api/addFolder'
 import useCredentials from '../../hooks/useCredentials'
 
-export default function CreateFolderModal({ isOpen, handleClose, currentDirectory = "", setCurrentDirectory }) {
+export default function CreateFolderModal({ isOpen, handleClose, currentDirectory = "", setCurrentDirectory, folderName, setFolderName }) {
 
-    const [folderName, setFolderName] = useState('')
     const { s3, credentials } = useCredentials()
 
     async function handleCreateFolder(event) {
@@ -17,7 +16,6 @@ export default function CreateFolderModal({ isOpen, handleClose, currentDirector
     }
 
     function handleCancel() {
-        setFolderName('')
         handleClose()
     }
 

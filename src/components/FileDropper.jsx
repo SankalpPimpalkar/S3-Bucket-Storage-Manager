@@ -1,9 +1,13 @@
 import { CloudUpload, FileText, X } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import MultiPartUpload from '../api/MultiPartUpload'
+import useCredentials from '../hooks/useCredentials'
 
-export default function FileDropper() {
+export default function FileDropper({ currentDirectory = "", uploading = false, setUploading }) {
     const [isDragging, setIsDragging] = useState(false)
     const [files, setFiles] = useState([])
+    const [uploadingIndex, setUploadingIndex] = useState(null)
+    const { s3, credentials } = useCredentials()
 
     const handleDragEnter = useCallback((e) => {
         e.preventDefault()
@@ -26,7 +30,6 @@ export default function FileDropper() {
         e.preventDefault()
         e.stopPropagation()
         setIsDragging(false)
-
         const droppedFiles = Array.from(e.dataTransfer.files)
         setFiles(prevFiles => [...prevFiles, ...droppedFiles])
     }, [])
@@ -40,10 +43,39 @@ export default function FileDropper() {
         setFiles(prevFiles => prevFiles.filter((_, i) => i !== index))
     }, [])
 
+    async function handleFilesUpload() {
+        setUploading(true)
+
+        for (let i = 0; i < files.length; i++) {
+            setUploadingIndex(i)
+
+            const file = files[i]
+            const success = await MultiPartUpload(s3, file, currentDirectory, credentials.name)
+
+            if (!success) {
+                console.error(`Upload failed: ${file.name}`)
+                break
+            }
+        }
+
+        // Reset
+        setFiles([])
+        setUploadingIndex(null)
+        setUploading(false)
+    }
+
+    useEffect(() => {
+        console.log(uploading)
+        if (files.length > 0 && !uploading) {
+            handleFilesUpload()
+        }
+    }, [files, credentials, currentDirectory, uploading])
+
+    const borderColor = uploading ? 'border-green-500 bg-green-950' : isDragging ? 'border-[#555] bg-[#202020]' : 'border-[#252525] bg-[#101010]'
+
     return (
         <div
-            className={`w-full p-6 border-2 border-dashed rounded-lg transition-colors ${isDragging ? 'border-[#555] bg-[#202020]' : 'border-[#252525] bg-[#101010]'
-                }`}
+            className={`w-full p-6 border-2 border-dashed rounded-lg transition-colors ${borderColor}`}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
@@ -54,7 +86,11 @@ export default function FileDropper() {
 
                 <div className="text-center">
                     <p className="font-mono text-sm text-gray-400">
-                        {isDragging ? 'Drop files here' : 'Drag & drop files here, or click to select'}
+                        {uploading
+                            ? 'Uploading...'
+                            : isDragging
+                                ? 'Drop files here'
+                                : 'Drag & drop files here, or click to select'}
                     </p>
                     <p className="font-mono text-xs text-gray-600 mt-1">
                         Supports multiple files
@@ -67,6 +103,7 @@ export default function FileDropper() {
                         className="hidden"
                         multiple
                         onChange={handleFileInput}
+                        disabled={uploading}
                     />
                     Select Files
                 </label>
@@ -75,14 +112,14 @@ export default function FileDropper() {
             {files.length > 0 && (
                 <div className="mt-6 space-y-2">
                     <h5 className="font-mono text-xs text-gray-500 mb-2">
-                        Selected files ({files.length})
+                        {uploading ? `Uploading files... (${uploadingIndex + 1}/${files.length})` : `Selected files (${files.length})`}
                     </h5>
 
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                         {files.map((file, index) => (
                             <div
                                 key={index}
-                                className="flex items-center justify-between p-3 bg-[#151515] border border-[#252525] rounded-md"
+                                className={`${(uploading == true && uploadingIndex > index) && 'hidden'} flex items-center justify-between p-3 rounded-md ${index === uploadingIndex ? 'bg-green-900 border border-green-600' : 'bg-[#151515] border border-[#252525]'}`}
                             >
                                 <div className="flex items-center space-x-2">
                                     <FileText size={18} className='text-gray-500' />
@@ -91,12 +128,14 @@ export default function FileDropper() {
                                     </span>
                                 </div>
 
-                                <button
-                                    onClick={() => removeFile(index)}
-                                    className="text-gray-500 hover:text-gray-300"
-                                >
-                                    <X size={18} className='text-gray-500 cursor-pointer' />
-                                </button>
+                                {!uploading && (
+                                    <button
+                                        onClick={() => removeFile(index)}
+                                        className="text-gray-500 hover:text-gray-300"
+                                    >
+                                        <X size={18} className='text-gray-500 cursor-pointer' />
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>

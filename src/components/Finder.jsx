@@ -1,11 +1,14 @@
-import { Download, Eye, FileText, Folder, Trash2 } from 'lucide-react'
+import { Download, Eye, FileText, Folder, LoaderCircle, Trash2 } from 'lucide-react'
 import getFilePreview from '../api/getFilePreview'
 import deleteFileOrFolder from '../api/deleteFileOrFolder'
 import useCredentials from '../hooks/useCredentials'
+import { useState } from 'react'
 
 export default function Finder({ contents = [], setCurrentDirectory }) {
 
     const { s3, credentials } = useCredentials()
+    const [isDeletingFileOrFolder, setIsDeletingFileOrFolder] = useState(false)
+    const [deletingFileOrFolderKey, setDeletingFileOrFolderKey] = useState(null)
 
     async function handleFilePreview(key) {
         const previewUrl = await getFilePreview(s3, key, credentials.name)
@@ -13,8 +16,13 @@ export default function Finder({ contents = [], setCurrentDirectory }) {
     }
 
     async function handleDeleteFileOrFolder(key) {
+        setIsDeletingFileOrFolder(true)
+        setDeletingFileOrFolderKey(key)
         await deleteFileOrFolder(s3, key, credentials.name)
         setCurrentDirectory('')
+        setDeletingFileOrFolderKey(null)
+        setIsDeletingFileOrFolder(false)
+        window.location.reload()
     }
 
     async function handleFileDownload(key) {
@@ -66,11 +74,21 @@ export default function Finder({ contents = [], setCurrentDirectory }) {
                                     onClick={() => handleFilePreview(content.key)}
                                 />
                             }
-                            <Trash2
-                                size={18}
-                                className='text-red-300 cursor-pointer'
-                                onClick={() => handleDeleteFileOrFolder(content.key)}
-                            />
+                            {
+                                (
+                                    deletingFileOrFolderKey == content.key &&
+                                    isDeletingFileOrFolder
+                                ) ?
+                                    <LoaderCircle
+                                        size={18}
+                                        className='text-yellow-300 cursor-pointer animate-spin'
+                                    /> :
+                                    <Trash2
+                                        size={18}
+                                        className='text-red-300 cursor-pointer'
+                                        onClick={() => handleDeleteFileOrFolder(content.key)}
+                                    />
+                            }
                             {
                                 content.type != 'folder' &&
                                 <Download
