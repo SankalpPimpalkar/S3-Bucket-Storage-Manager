@@ -11,7 +11,8 @@ export default function Finder({ contents = [], setCurrentDirectory }) {
     const [deletingFileOrFolderKey, setDeletingFileOrFolderKey] = useState(null)
 
     async function handleFilePreview(key) {
-        const previewUrl = await getFilePreview(s3, key, credentials.name)
+        console.log("Previweing", credentials)
+        const previewUrl = await getFilePreview(s3, key, false, credentials.name)
         window.open(previewUrl, '_blank')
     }
 
@@ -32,6 +33,8 @@ export default function Finder({ contents = [], setCurrentDirectory }) {
         a.download = '';
         a.click();
     }
+
+    console.log(contents)
 
     return (
         <div className='divide-y divide-[#252525]'>
