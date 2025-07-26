@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import FileDropper from './FileDropper'
 import Finder from './Finder'
 import listFiles from '../api/listFiles'
@@ -14,10 +14,16 @@ export default function Container() {
     const { s3, credentials } = useCredentials()
     const [uploading, setUploading] = useState(false)
 
+    const handleSetCurrentDirectory = useCallback(
+        (location) => {
+            localStorage.setItem('currentDirectory', location)
+            setCurrentDirectory(location)
+        }, [])
+
     function handleBack() {
         const parts = currentDirectory.split("/").filter(Boolean);
         parts.pop();
-        setCurrentDirectory("/" + parts.join("/"));
+        handleSetCurrentDirectory("/" + parts.join("/"));
     }
 
     useEffect(() => {
@@ -35,9 +41,12 @@ export default function Container() {
 
         if (!credentials) return
 
+        const location = localStorage.getItem('currentDirectory') || '/'
+        setCurrentDirectory(location)
+
         if (!isCreateFolderModalOpen) {
             (async () => {
-                const contents = await listFiles(s3, currentDirectory, credentials.name)
+                const contents = await listFiles(s3, location, credentials.name)
                 setFiles(contents)
             })()
         }
@@ -79,7 +88,7 @@ export default function Container() {
                     <Finder
                         contents={files}
                         currentDirectory={currentDirectory}
-                        setCurrentDirectory={setCurrentDirectory}
+                        setCurrentDirectory={handleSetCurrentDirectory}
                     />
                 </div>
             </div>
@@ -94,7 +103,7 @@ export default function Container() {
                     setFolderName('')
                 }}
                 currentDirectory={currentDirectory}
-                setCurrentDirectory={setCurrentDirectory}
+                setCurrentDirectory={handleSetCurrentDirectory}
             />
         </div>
     )

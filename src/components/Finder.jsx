@@ -28,10 +28,7 @@ export default function Finder({ contents = [], setCurrentDirectory }) {
 
     async function handleFileDownload(key) {
         const previewUrl = await getFilePreview(s3, key, true, credentials.name)
-        const a = document.createElement('a');
-        a.href = previewUrl;
-        a.download = '';
-        a.click();
+        window.open(previewUrl, 'download')
     }
 
     console.log(contents)
