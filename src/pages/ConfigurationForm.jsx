@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useCredentials from '../hooks/useCredentials'
+import { S3Client } from '@aws-sdk/client-s3'
+import listFiles from '../api/listFiles'
+import { toast } from 'react-toastify'
 
 export default function ConfigurationForm() {
 
@@ -13,7 +16,7 @@ export default function ConfigurationForm() {
     const { credentials } = useCredentials()
     const navigate = useNavigate()
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault()
 
         if (
@@ -25,9 +28,37 @@ export default function ConfigurationForm() {
             alert("All fields are required")
             return
         }
+        try {
+            const tempClient = new S3Client({
+                region: formData.region,
+                credentials: {
+                    accessKeyId: formData.access_key,
+                    secretAccessKey: formData.secret_key
+                }
+            })
+            
+            await listFiles(tempClient, '', formData.name)
+            localStorage.setItem("credentials", JSON.stringify(formData))
+            toast.success("Authorization successfull")
+            setFormData({
+                name: '',
+                secret_key: '',
+                access_key: '',
+                region: ''
+            })
+            return navigate('/')
 
-        localStorage.setItem("credentials", JSON.stringify(formData))
-        navigate('/')
+        } catch (error) {
+            console.log(error)
+            toast.error("Please enter valid credentials")
+            setFormData({
+                name: '',
+                secret_key: '',
+                access_key: '',
+                region: ''
+            })
+            return
+        }
     }
 
     useEffect(() => {

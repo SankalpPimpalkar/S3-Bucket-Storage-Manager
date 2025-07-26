@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom"
-import useCredentials from "../hooks/useCredentials"
 
 export default function Header({ credentials }) {
     const navigate = useNavigate()
 
     function handleDisconnect() {
         localStorage.removeItem("credentials")
-        navigate("/config")
+        return navigate("/config")
     }
 
     return (

@@ -35,11 +35,13 @@ export default function Container() {
 
         if (!credentials) return
 
-        (async () => {
-            const contents = await listFiles(s3, currentDirectory, credentials.name)
-            setFiles(contents)
-        })()
-    }, [currentDirectory, s3, credentials, uploading])
+        if (!isCreateFolderModalOpen) {
+            (async () => {
+                const contents = await listFiles(s3, currentDirectory, credentials.name)
+                setFiles(contents)
+            })()
+        }
+    }, [currentDirectory, s3, credentials, uploading, isCreateFolderModalOpen])
 
     return (
         <div className='w-full px-4 py-4 pb-20'>

@@ -55,7 +55,7 @@ export default function Finder({ contents = [], setCurrentDirectory }) {
                             }
 
                             <p
-                                className={`${content.type == "file" ? "text-gray-400" : "text-yellow-500"} text-xs font-mono hover:underline cursor-pointer`}
+                                className={`${content.type == "file" ? "text-gray-400" : "text-yellow-500 cursor-pointer"} text-xs font-mono`}
                                 onClick={() => {
                                     if (content.type == 'folder') {
                                         setCurrentDirectory('/' + content.key)

@@ -11,7 +11,7 @@ export default function CreateFolderModal({ isOpen, handleClose, currentDirector
         let folderPath = currentDirectory.slice(1)
 
         await addFolder(s3, folderPath + folderName, credentials.name)
-        setCurrentDirectory(folderPath + folderName + '/')
+        // setCurrentDirectory(folderPath + folderName + '/')
         handleClose()
     }
 

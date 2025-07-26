@@ -45,7 +45,7 @@ export default function CredentialsProvider({ children }) {
             console.error("Invalid credentials in localStorage", err);
             navigate('/config')
         }
-    }, []);
+    }, [navigate]);
 
     const values = { s3, credentials };
 
